@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 import mysql.connector
 
-from app.schemas import RegisterUser
+from app.schemas import RegisterUser, LoginUser
 from app.dependencies import get_db
-from app.utils.security import hash_password
+from app.utils.security import hash_password, verify_password, create_access_token
 
 
 router = APIRouter(
@@ -56,6 +56,50 @@ def register_user(user: RegisterUser, db=Depends(get_db)):
             status_code=500,
             detail="Database error"
         )
+
+    finally:
+        cursor.close()
+
+
+@router.post("/login")
+def login_user(user: LoginUser,db=Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            """
+            SELECT id, name, email, password
+            FROM users
+            WHERE email = %s
+            """,(user.email,)
+        )
+
+        existing_user = cursor.fetchone()
+
+        if not existing_user:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid email or password"
+            )
+
+        password_valid = verify_password(user.password, existing_user["password"])
+
+        if not password_valid:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid email or password"
+            )
+        access_token = create_access_token(existing_user["id"])
+        return {
+            "message": "Login successful",
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": existing_user["id"],
+                "name": existing_user["name"],
+                "email": existing_user["email"]
+            }
+        }
 
     finally:
         cursor.close()
