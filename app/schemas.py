@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from datetime import date
 
 class RegisterUser(BaseModel):
     name: str
@@ -12,3 +13,20 @@ class LoginUser(BaseModel):
     password: str
 
 
+class CategoryCreate(BaseModel):
+    name: str
+
+
+class ExpenseCreate(BaseModel):
+    category_id: int
+    amount: float
+    description: str | None = None
+    expense_date: date
+    payment_method: str
+
+class ExpenseUpdate(BaseModel):
+    category_id: int
+    amount: float
+    description: str | None = None
+    expense_date: date
+    payment_method: str

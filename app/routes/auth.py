@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 import mysql.connector
 
 from app.schemas import RegisterUser, LoginUser
-from app.dependencies import get_db
+from app.dependencies import get_db, get_current_user
 from app.utils.security import hash_password, verify_password, create_access_token
 
 
@@ -100,6 +100,34 @@ def login_user(user: LoginUser,db=Depends(get_db)):
                 "email": existing_user["email"]
             }
         }
+
+    finally:
+        cursor.close()
+
+
+
+@router.get("/profile")
+def get_profile(user_id: int = Depends(get_current_user), db=Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            """
+            SELECT id, name, email, created_at
+            FROM users
+            WHERE id = %s
+            """, (user_id,)
+        )
+
+        user = cursor.fetchone()
+
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found"
+            )
+
+        return user
 
     finally:
         cursor.close()

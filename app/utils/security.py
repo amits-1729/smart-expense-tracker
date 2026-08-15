@@ -39,6 +39,22 @@ def create_access_token(user_id: int) -> str:
         algorithm=ALGORITHM
     )
 
+
+def decode_access_token(token: str) -> int:
+    payload = jwt.decode(
+        token,
+        settings.SECRET_KEY,
+        algorithms=[ALGORITHM]
+    )
+
+    user_id = payload.get("sub")
+
+    if user_id is None:
+        raise ValueError("Invalid token")
+
+    return int(user_id)
+
+
 # if __name__ == "__main__":
 #     token = create_access_token(1)
 
