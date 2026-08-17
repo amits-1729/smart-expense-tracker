@@ -184,7 +184,7 @@ def update_budget(
         if not existing_budget:
             raise HTTPException(
                 status_code=404,
-                detail="Expense not found"
+                detail="Budget not found"
             )
 
         # Check whether category exists
