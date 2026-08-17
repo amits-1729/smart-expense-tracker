@@ -30,3 +30,16 @@ class ExpenseUpdate(BaseModel):
     description: str | None = None
     expense_date: date
     payment_method: str
+
+
+
+class BudgetCreate(BaseModel):
+    category_id: int
+    amount: float
+    month: str
+
+
+class BudgetUpdate(BaseModel):
+    category_id: int
+    amount: float
+    month: str
