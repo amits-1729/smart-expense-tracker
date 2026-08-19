@@ -100,7 +100,7 @@ def get_budgets(
     user_id: int = Depends(get_current_user),
     db = Depends(get_db)
 ):
-    cursor = db.cursor(dictionary = True)
+    cursor = db.cursor()
     try:
         cursor.execute(
             """
@@ -132,7 +132,7 @@ def get_budget(
     user_id: int = Depends(get_current_user),
     db = Depends(get_db)
 ):
-    cursor = db.cursor(dictionary = True)
+    cursor = db.cursor()
     try:
         cursor.execute(
             """

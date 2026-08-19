@@ -63,7 +63,7 @@ def register_user(user: RegisterUser, db=Depends(get_db)):
 
 @router.post("/login")
 def login_user(user: LoginUser,db=Depends(get_db)):
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor()
 
     try:
         cursor.execute(
@@ -108,7 +108,7 @@ def login_user(user: LoginUser,db=Depends(get_db)):
 
 @router.get("/profile")
 def get_profile(user_id: int = Depends(get_current_user), db=Depends(get_db)):
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor()
 
     try:
         cursor.execute(

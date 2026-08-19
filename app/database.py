@@ -1,4 +1,4 @@
-import mysql.connector
+import pymysql
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -17,17 +17,21 @@ settings = Settings()
 
 
 def get_db_connection():
-    conn = mysql.connector.connect(
+    conn = pymysql.connect(
         host=settings.DB_HOST,
         user=settings.DB_USER,
         password=settings.DB_PASSWORD,
-        database=settings.DB_NAME
+        database=settings.DB_NAME,
+        cursorclass=pymysql.cursors.DictCursor
     )
     return conn
 
 
-# if __name__ == "__main__":
-#     conn = get_db_connection()
-#     if conn.is_connected():
-#         print("MYSQL connection is successful")
-#     conn.close()
+if __name__ == "__main__":
+    try:
+        conn = get_db_connection()
+        if conn:
+            print("MYSQL connection is successful")
+        conn.close()
+    except Exception as e:
+        print(f"Error: {e}")
