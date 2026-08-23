@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Query
+from typing import Annotated
+
 
 from app.dependencies import get_db, get_current_user
-from app.schemas import ExpenseCreate, ExpenseUpdate
+from app.schemas import ExpenseCreate, ExpenseUpdate, ExpenseFilter
+
 
 
 router = APIRouter(
@@ -75,34 +79,52 @@ def create_expense(
 
 @router.get("")
 def get_expenses(
+    data : Annotated[ExpenseFilter,Query()],
     user_id: int = Depends(get_current_user),
     db=Depends(get_db)
 ):
     cursor = db.cursor()
+    query = """
+            SELECT
+            e.id, e.category_id, c.name AS category_name,
+            e.amount, e.description, e.expense_date,
+            e.payment_method, e.created_at
+            FROM expenses e JOIN categories c
+            ON e.category_id = c.id
+            WHERE e.user_id = %s
+            """
+
+    params = [user_id]
+
+    if(data.start_date):
+        query += " AND e.expense_date >= %s"
+        params.append(data.start_date)
+
+    if(data.end_date):
+        query += " AND e.expense_date <= %s"
+        params.append(data.end_date)
+
+    if(data.min_amount):
+        query += " And e.amount >= %s"
+        params.append(data.min_amount)
+
+    if(data.max_amount):
+        query += " And e.amount <= %s"
+        params.append(data.max_amount)
+
+    if(data.payment_method):
+        query += " AND e.payment_method = %s"
+        params.append(data.payment_method)
+        
+    if(data.category_id):
+        query += " AND e.category_id = %s"
+        params.append(data.category_id)
+
+    query += " ORDER BY e.expense_date DESC"
 
     try:
-        cursor.execute(
-            """
-            SELECT
-                e.id,
-                e.category_id,
-                c.name AS category_name,
-                e.amount,
-                e.description,
-                e.expense_date,
-                e.payment_method,
-                e.created_at
-            FROM expenses e
-            JOIN categories c
-                ON e.category_id = c.id
-            WHERE e.user_id = %s
-            ORDER BY e.expense_date DESC, e.id DESC
-            """,
-            (user_id,)
-        )
-
+        cursor.execute(query,params)
         expenses = cursor.fetchall()
-
         return {
             "expenses": expenses
         }
@@ -123,17 +145,11 @@ def get_expense(
         cursor.execute(
             """
             SELECT
-                e.id,
-                e.category_id,
-                c.name AS category_name,
-                e.amount,
-                e.description,
-                e.expense_date,
-                e.payment_method,
-                e.created_at
-            FROM expenses e
-            JOIN categories c
-                ON e.category_id = c.id
+            e.id, e.category_id, c.name AS category_name,
+            e.amount, e.description, e.expense_date,
+            e.payment_method, e.created_at
+            FROM expenses e JOIN categories c
+            ON e.category_id = c.id
             WHERE e.id = %s
             AND e.user_id = %s
             """,

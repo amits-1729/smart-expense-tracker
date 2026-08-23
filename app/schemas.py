@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date
+from typing import Optional
 
 class RegisterUser(BaseModel):
     name: str
@@ -30,6 +31,14 @@ class ExpenseUpdate(BaseModel):
     description: str | None = None
     expense_date: date
     payment_method: str
+
+class ExpenseFilter(BaseModel):
+    min_amount:Optional[float] = None
+    max_amount:Optional[float] = None
+    payment_method:Optional[str] = None
+    category_id:Optional[int] = None
+    start_date:Optional[date] = None
+    end_date:Optional[date] = None
 
 
 
