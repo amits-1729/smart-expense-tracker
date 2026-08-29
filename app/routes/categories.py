@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.dependencies import get_db, get_current_user
 from app.schemas import CategoryCreate
+from app.services.category_service import create_category_service, get_categories_service, get_category_service, update_category_service, delete_category_service
 
 
 router = APIRouter(
@@ -16,42 +17,11 @@ def create_category(
     user_id: int = Depends(get_current_user),
     db=Depends(get_db)
 ):
-    cursor = db.cursor()
-
-    try:
-        cursor.execute(
-            "SELECT id FROM categories WHERE name = %s",
-            (category.name,)
-        )
-
-        existing_category = cursor.fetchone()
-
-        if existing_category:
-            raise HTTPException(
-                status_code=400,
-                detail="Category already exists"
-            )
-
-        cursor.execute(
-            """
-            INSERT INTO categories (name)
-            VALUES (%s)
-            """,
-            (category.name,)
-        )
-
-        db.commit()
-
-        category_id = cursor.lastrowid
-
-        return {
-            "message": "Category created successfully",
-            "category_id": category_id,
-            "name": category.name
-        }
-
-    finally:
-        cursor.close()
+    return create_category_service(
+        db,
+        user_id,
+        category
+    )
 
 
 @router.get("")
@@ -59,25 +29,8 @@ def get_categories(
     user_id: int = Depends(get_current_user),
     db=Depends(get_db)
 ):
-    cursor = db.cursor()
+    return get_categories_service(db,user_id)
 
-    try:
-        cursor.execute(
-            """
-            SELECT id, name
-            FROM categories
-            ORDER BY name
-            """
-        )
-
-        categories = cursor.fetchall()
-
-        return {
-            "categories": categories
-        }
-
-    finally:
-        cursor.close()
 
 
 @router.get("/{category_id}")
@@ -86,30 +39,8 @@ def get_category(
     user_id: int = Depends(get_current_user),
     db=Depends(get_db)
 ):
-    cursor = db.cursor()
+    return get_category_service(db,user_id,category_id)
 
-    try:
-        cursor.execute(
-            """
-            SELECT id, name
-            FROM categories
-            WHERE id = %s
-            """,
-            (category_id,)
-        )
-
-        category = cursor.fetchone()
-
-        if not category:
-            raise HTTPException(
-                status_code=404,
-                detail="Category not found"
-            )
-
-        return category
-
-    finally:
-        cursor.close()
 
 
 @router.put("/{category_id}")
@@ -119,65 +50,13 @@ def update_category(
     user_id: int = Depends(get_current_user),
     db=Depends(get_db)
 ):
-    cursor = db.cursor()
+    return update_category_service(
+        db,
+        user_id,
+        category_id,
+        category
+    )
 
-    try:
-        # Check whether category exists
-        cursor.execute(
-            """
-            SELECT id
-            FROM categories
-            WHERE id = %s
-            """,
-            (category_id,)
-        )
-
-        existing_category = cursor.fetchone()
-
-        if not existing_category:
-            raise HTTPException(
-                status_code=404,
-                detail="Category not found"
-            )
-
-        # Check duplicate category name
-        cursor.execute(
-            """
-            SELECT id
-            FROM categories
-            WHERE name = %s AND id != %s
-            """,
-            (category.name, category_id)
-        )
-
-        duplicate_category = cursor.fetchone()
-
-        if duplicate_category:
-            raise HTTPException(
-                status_code=400,
-                detail="Category already exists"
-            )
-
-        # Update category
-        cursor.execute(
-            """
-            UPDATE categories
-            SET name = %s
-            WHERE id = %s
-            """,
-            (category.name, category_id)
-        )
-
-        db.commit()
-
-        return {
-            "message": "Category updated successfully",
-            "category_id": category_id,
-            "name": category.name
-        }
-
-    finally:
-        cursor.close()
 
 
 @router.delete("/{category_id}")
@@ -186,39 +65,8 @@ def delete_category(
     user_id: int = Depends(get_current_user),
     db=Depends(get_db)
 ):
-    cursor = db.cursor()
-
-    try:
-        cursor.execute(
-            """
-            SELECT id
-            FROM categories
-            WHERE id = %s
-            """,
-            (category_id,)
-        )
-
-        existing_category = cursor.fetchone()
-
-        if not existing_category:
-            raise HTTPException(
-                status_code=404,
-                detail="Category not found"
-            )
-
-        cursor.execute(
-            """
-            DELETE FROM categories
-            WHERE id = %s
-            """,
-            (category_id,)
-        )
-
-        db.commit()
-
-        return {
-            "message": "Category deleted successfully"
-        }
-
-    finally:
-        cursor.close()
+    return delete_category_service(
+        db,
+        user_id,
+        category_id
+    )

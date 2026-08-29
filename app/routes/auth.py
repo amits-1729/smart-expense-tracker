@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-import mysql.connector
+import pymysql
 
 from app.schemas import RegisterUser, LoginUser
 from app.dependencies import get_db, get_current_user
@@ -49,7 +49,7 @@ def register_user(user: RegisterUser, db=Depends(get_db)):
             "message": "User registered successfully"
         }
 
-    except mysql.connector.Error:
+    except pymysql.MySQLError:
         db.rollback()
 
         raise HTTPException(

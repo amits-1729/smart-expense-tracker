@@ -3,6 +3,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Optional, Literal
 
+
 class RegisterUser(BaseModel):
     name: str
     email: EmailStr
@@ -18,28 +19,6 @@ class LoginUser(BaseModel):
 class CategoryCreate(BaseModel):
     name: str
 
-
-# class ExpenseCreate(BaseModel):
-#     category_id: int
-#     amount: float
-#     description: str | None = None
-#     expense_date: date
-#     payment_method: str
-
-# class ExpenseUpdate(BaseModel):
-#     category_id: int
-#     amount: float
-#     description: str | None = None
-#     expense_date: date
-#     payment_method: str
-
-# class ExpenseFilter(BaseModel):
-#     min_amount:Optional[float] = None
-#     max_amount:Optional[float] = None
-#     payment_method:Optional[str] = None
-#     category_id:Optional[int] = None
-#     start_date:Optional[date] = None
-#     end_date:Optional[date] = None
 
 class AccountCreate(BaseModel):
     name:str
@@ -67,7 +46,7 @@ class TransactionFilter(BaseModel):
     category_id:Optional[int] = None
     start_date:Optional[date] = None
     end_date:Optional[date] = None
-    type: Literal["INCOME", "EXPENSE"] = "EXPENSE"
+    type: Optional[Literal["INCOME", "EXPENSE"]] = None
 
 class BudgetCreate(BaseModel):
     category_id: int
