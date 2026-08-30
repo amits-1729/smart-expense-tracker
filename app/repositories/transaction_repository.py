@@ -1,19 +1,5 @@
 from app.schemas import TransactionCreate, TransactionFilter, TransactionUpdate
 
-def get_category(cursor, category_id):
-    cursor.execute(
-        "SELECT id FROM categories WHERE id = %s",
-        (category_id,)
-    )
-    return cursor.fetchone()
-
-
-def get_account(cursor, account_id, user_id):
-    cursor.execute(
-        "SELECT id FROM accounts WHERE id = %s AND user_id = %s",
-        (account_id, user_id)
-    )
-    return cursor.fetchone()
 
 
 def create_transaction(
@@ -43,34 +29,6 @@ def create_transaction(
     return cursor.lastrowid
 
 
-def update_account_balance(
-    cursor,
-    user_id,
-    account_id,
-    amount,
-    transaction_type
-):
-
-    if transaction_type == "EXPENSE":
-        cursor.execute(
-            """
-            UPDATE accounts
-            SET balance = balance - %s
-            WHERE id = %s AND user_id = %s
-            """,
-            (amount, account_id, user_id)
-        )
-
-    else:
-        cursor.execute(
-            """
-            UPDATE accounts
-            SET balance = balance + %s
-            WHERE id = %s AND user_id = %s
-            """,
-            (amount, account_id, user_id)
-        )
-
 
 
 def get_transactions(
@@ -92,9 +50,10 @@ def get_transactions(
         JOIN accounts a
         ON t.account_id = a.id
         WHERE t.user_id = %s
+        AND (c.user_id = %s OR c.user_id IS NULL)
     """
 
-    params = [user_id]
+    params = [user_id, user_id]
 
     if data.start_date:
         query += " AND t.transaction_date >= %s"
@@ -149,8 +108,9 @@ def get_transaction(
             ON t.account_id = a.id
             WHERE t.id = %s
             AND t.user_id = %s
+            AND (c.user_id = %s OR c.user_id IS NULL)
         """
-    params = [transaction_id, user_id]
+    params = [transaction_id, user_id, user_id]
     cursor.execute(query,params)
 
     return cursor.fetchone()

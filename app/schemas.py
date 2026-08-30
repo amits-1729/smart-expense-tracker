@@ -54,6 +54,14 @@ class BudgetCreate(BaseModel):
     month: str
 
 
+class BudgetFilter(BaseModel):
+    month: Optional[int] = None
+    year: Optional[int] = None
+    category_id: Optional[int] = None
+    min_amount: Optional[float] = None
+    max_amount: Optional[float] = None
+
+
 class BudgetUpdate(BaseModel):
     category_id: int
     amount: float

@@ -1,10 +1,9 @@
 from fastapi import HTTPException
 
 from app.schemas import TransactionCreate, TransactionFilter, TransactionUpdate
-from app.repositories.transaction_repository import (
-    get_category, get_account, create_transaction, update_account_balance,
-    get_transactions, get_transaction, update_transaction, delete_transaction
-)
+from app.repositories.transaction_repository import (create_transaction, get_transactions, get_transaction, update_transaction, delete_transaction)
+from app.repositories.category_repository import get_category
+from app.repositories.account_repository import get_account, update_account_balance
 
 
 def create_transaction_service(
@@ -16,20 +15,20 @@ def create_transaction_service(
 
     try:
         if transaction.type == "EXPENSE":
-            category = get_category(cursor,transaction.category_id)
+            category = get_category(cursor, user_id, transaction.category_id)
             if not category: 
                 raise HTTPException(
                     status_code=404,
                     detail="Category not found" 
                 )
-        account = get_account(cursor, transaction.account_id, user_id)
+        account = get_account(cursor, user_id, transaction.account_id)
         if not account: 
             raise HTTPException(
                 status_code=404,
                 detail="Account not found" 
             )
         
-        txn_id = create_transaction( cursor, user_id, transaction)
+        txn_id = create_transaction(cursor, user_id, transaction)
         update_account_balance(cursor, user_id, transaction.account_id, transaction.amount, transaction.type )
 
         db.commit()
@@ -56,7 +55,7 @@ def get_transactions_service(
     cursor = db.cursor()
 
     try:
-        transactions = get_transactions(cursor,user_id, data)
+        transactions = get_transactions(cursor, user_id, data)
 
         return {
             "transactions": transactions
@@ -105,14 +104,14 @@ def update_transaction_service(
             )
         
         if transaction.type == "EXPENSE":
-            category = get_category(cursor, transaction.category_id)
+            category = get_category(cursor, user_id, transaction.category_id)
             if not category: 
                 raise HTTPException(
                     status_code=404,
                     detail="Category not found" 
                 )
 
-        account = get_account(cursor, transaction.account_id, user_id)
+        account = get_account(cursor, user_id, transaction.account_id)
         if not account: 
             raise HTTPException(
                 status_code=404,
