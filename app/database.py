@@ -8,9 +8,9 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     DB_NAME: str
     SECRET_KEY: str
-    EMAIL_ADDRESS: str
-    EMAIL_APP_PASSWORD: str
-    FRONTEND_URL: str
+    # EMAIL_ADDRESS: str
+    # EMAIL_APP_PASSWORD: str
+    # FRONTEND_URL: str
 
     class Config:
         env_file = ".env"
