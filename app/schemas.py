@@ -66,3 +66,17 @@ class BudgetUpdate(BaseModel):
     category_id: int
     amount: float
     month: str
+
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+class ChangePasswordRequest(BaseModel):
+    new_password: str
