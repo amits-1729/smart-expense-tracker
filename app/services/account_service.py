@@ -1,7 +1,11 @@
 from fastapi import HTTPException
 from app.schemas import AccountCreate
-from app.repositories.account_repository import create_account, get_accounts
 
+from app.repositories.account_repository import (
+    create_account,
+    get_account_by_name,
+    get_accounts
+)
 
 
 def create_account_service(
@@ -10,9 +14,8 @@ def create_account_service(
     data: AccountCreate
 ):
     cursor = db.cursor()
-
     try:
-        account = get_accounts(cursor, user_id, data.name)
+        account = get_account_by_name(cursor, user_id, data.name)
         if account:
             raise HTTPException(
                 status_code=400,
@@ -20,7 +23,6 @@ def create_account_service(
             )
 
         account_id = create_account(cursor, user_id, data.name)
-        
         db.commit()
 
         return {
@@ -34,7 +36,6 @@ def create_account_service(
                 
     finally:
         cursor.close()
-
 
 
 def get_accounts_service(

@@ -4,18 +4,21 @@ from fastapi import HTTPException
 from app.schemas import (
     RegisterUser,
     LoginUser,
-    ForgotPasswordRequest,
-    ResetPasswordRequest
+    ForgotPassword,
+    ResetPassword
 )
+
 from app.repositories.auth_repository import (
-    get_user,
+    get_user_by_email,
     register_user,
     get_user_by_id,
     reset_password
 )
 
 from app.utils.security import (
-    hash_password, verify_password, create_access_token, create_password_reset_token, decode_password_reset_token
+    hash_password, verify_password,
+    create_access_token,
+    create_password_reset_token, decode_password_reset_token
 )
 
 from app.database import settings
@@ -23,15 +26,10 @@ from app.database import settings
 from app.utils.email_utils import send_reset_email
 
 
-
-
-def register_user_service(
-    db,
-    user: RegisterUser
-):
+def register_user_service(db, user: RegisterUser):
     cursor = db.cursor()
     try:
-        existing_user = get_user(cursor, user.email)
+        existing_user = get_user_by_email(cursor, user.email)
         if existing_user:
             raise HTTPException(
                 status_code=400,
@@ -49,7 +47,6 @@ def register_user_service(
 
     except pymysql.MySQLError:
         db.rollback()
-
         raise HTTPException(
             status_code=500,
             detail="Database error"
@@ -59,14 +56,10 @@ def register_user_service(
         cursor.close()
 
 
-
-def login_user_service(
-    db,
-    user: LoginUser
-):
+def login_user_service(db, user: LoginUser):
     cursor = db.cursor()
     try:
-        existing_user = get_user(cursor,user.email)
+        existing_user = get_user_by_email(cursor,user.email)
         if not existing_user:
             raise HTTPException(
                 status_code=401,
@@ -79,6 +72,7 @@ def login_user_service(
                 status_code=401,
                 detail="Invalid email or password"
             )
+        
         access_token = create_access_token(existing_user["id"])
         return {
             "message": "Login successful",
@@ -91,17 +85,18 @@ def login_user_service(
             }
         }
 
+    except pymysql.MySQLError:
+        raise HTTPException(
+            status_code=500,
+            detail="Database error"
+        )
+
     finally:
         cursor.close()
 
 
-
-def get_profile_service(
-    db,
-    user_id: int
-):
+def get_profile_service(db, user_id: int):
     cursor = db.cursor()
-
     try:
         user = get_user_by_id(cursor, user_id)
         if not user:
@@ -109,39 +104,29 @@ def get_profile_service(
                 status_code=404,
                 detail="User not found"
             )
-
         return user
 
     finally:
         cursor.close()
 
 
-
-def forgot_password_service(
-    db,
-    data: ForgotPasswordRequest
-):
-
+def forgot_password_service(db, data: ForgotPassword):
     cursor = db.cursor()
     try:
-        user = get_user(cursor, data.email)
+        user = get_user_by_email(cursor, data.email)
         if user:
-            reset_token = create_password_reset_token(
-                user["id"]
-            )
-
+            reset_token = create_password_reset_token(user["id"])
             reset_link = (
                 f"{settings.FRONTEND_URL}"
                 f"?token={reset_token}"
             )
+
             send_reset_email(
                 user["email"],
                 reset_link
             )
-
             # print("PASSWORD RESET LINK:")
             # print(reset_link)
-
         return {
             "message": (
                 "If an account exists with this email, "
@@ -153,12 +138,7 @@ def forgot_password_service(
         cursor.close()
 
 
-
-def reset_password_service(
-    db,
-    data: ResetPasswordRequest
-):
-
+def reset_password_service(db, data: ResetPassword):
     try:
         user_id = decode_password_reset_token(
             data.token
@@ -171,7 +151,6 @@ def reset_password_service(
         )
 
     cursor = db.cursor()
-
     try:
         user = get_user_by_id(cursor, user_id)
         if not user:

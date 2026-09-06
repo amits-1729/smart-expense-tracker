@@ -1,10 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from typing import Annotated
 
 from app.dependencies import get_db, get_current_user
-from app.schemas import TransactionCreate, TransactionFilter, TransactionUpdate
-from app.services.transaction_service import create_transaction_service, get_transactions_service, get_transaction_service, update_transaction_service, delete_transaction_service
 
+from app.schemas import (
+    TransactionCreate, TransactionFilter, TransactionUpdate
+)
+from app.services.transaction_service import (
+    create_transaction_service, get_transactions_service, get_transaction_service, update_transaction_service, delete_transaction_service
+)
 
 router = APIRouter(
     prefix="/transactions",
@@ -19,11 +23,8 @@ def create_transaction(
     db = Depends(get_db)
 ):
     return create_transaction_service(
-        db,
-        user_id,
-        transaction
+        db, user_id, transaction
     )
-
 
 
 @router.get("")
@@ -33,9 +34,7 @@ def get_transactions(
     db=Depends(get_db)
 ):
     return get_transactions_service(
-        db,
-        user_id,
-        data
+        db, user_id, data
     )
     
 

@@ -1,8 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from app.schemas import AccountCreate
 from app.dependencies import get_current_user, get_db
-from app.services.account_service import create_account_service, get_accounts_service
+
+from app.services.account_service import (
+    create_account_service,
+    get_accounts_service
+)
 
 router = APIRouter(
     prefix="/accounts",
@@ -18,9 +22,8 @@ def create_account(
     return create_account_service(db, user_id, data)
 
 
-
 @router.get("")
-def get_account(
+def get_accounts(
     user_id: int = Depends(get_current_user),
     db = Depends(get_db)
 ):

@@ -1,9 +1,17 @@
 from fastapi import HTTPException
 
-from app.schemas import TransactionCreate, TransactionFilter, TransactionUpdate
-from app.repositories.transaction_repository import (create_transaction, get_transactions, get_transaction, update_transaction, delete_transaction)
-from app.repositories.category_repository import get_category
-from app.repositories.account_repository import get_account, update_account_balance
+from app.schemas import (
+    TransactionCreate, TransactionFilter, TransactionUpdate
+)
+
+from app.repositories.transaction_repository import (
+    create_transaction, get_transactions, get_transaction, update_transaction, delete_transaction
+)
+from app.repositories.category_repository import get_category_by_id
+
+from app.repositories.account_repository import (
+    get_account_by_id, update_account_balance
+)
 
 
 def create_transaction_service(
@@ -12,29 +20,29 @@ def create_transaction_service(
     transaction: TransactionCreate
 ):
     cursor = db.cursor()
-
     try:
         if transaction.type == "EXPENSE":
-            category = get_category(cursor, user_id, transaction.category_id)
+            category = get_category_by_id(cursor, user_id, transaction.category_id)
             if not category: 
                 raise HTTPException(
                     status_code=404,
                     detail="Category not found" 
                 )
-        account = get_account(cursor, user_id, transaction.account_id)
+            
+        account = get_account_by_id(cursor, user_id, transaction.account_id)
         if not account: 
             raise HTTPException(
                 status_code=404,
                 detail="Account not found" 
             )
         
-        txn_id = create_transaction(cursor, user_id, transaction)
+        transaction_id = create_transaction(cursor, user_id, transaction)
         update_account_balance(cursor, user_id, transaction.account_id, transaction.amount, transaction.type )
 
         db.commit()
         return {
             "message": "Transaction added successfully",
-            "transaction_id": txn_id
+            "transaction_id": transaction_id
         }
     
     except Exception:
@@ -45,25 +53,20 @@ def create_transaction_service(
         cursor.close()
 
 
-
-
 def get_transactions_service(
     db,
     user_id: int,
     data: TransactionFilter
 ):
     cursor = db.cursor()
-
     try:
         transactions = get_transactions(cursor, user_id, data)
-
         return {
             "transactions": transactions
         }
 
     finally:
         cursor.close()
-
 
 
 def get_transaction_service(
@@ -79,7 +82,6 @@ def get_transaction_service(
                 status_code=404,
                 detail="Transaction not found"
             )
-
         return {
             "transaction": transaction
         }
@@ -104,21 +106,21 @@ def update_transaction_service(
             )
         
         if transaction.type == "EXPENSE":
-            category = get_category(cursor, user_id, transaction.category_id)
+            category = get_category_by_id(cursor, user_id, transaction.category_id)
             if not category: 
                 raise HTTPException(
                     status_code=404,
                     detail="Category not found" 
                 )
 
-        account = get_account(cursor, user_id, transaction.account_id)
+        account = get_account_by_id(cursor, user_id, transaction.account_id)
         if not account: 
             raise HTTPException(
                 status_code=404,
                 detail="Account not found" 
             )
 
-        txn_id = update_transaction(cursor, user_id, transaction_id, transaction)
+        update_transaction(cursor, user_id, transaction_id, transaction)
 
         update_account_balance(cursor, user_id, existing_transaction["account_id"], -existing_transaction["amount"], existing_transaction["type"])
 
@@ -127,9 +129,8 @@ def update_transaction_service(
         db.commit()
         return {
             "message": "Transaction updated successfully",
-            "transaction_id": txn_id
+            "transaction_id": transaction_id
         }
-
 
     except Exception:
         db.rollback()

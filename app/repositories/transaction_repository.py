@@ -1,5 +1,8 @@
-from app.schemas import TransactionCreate, TransactionFilter, TransactionUpdate
-
+from app.schemas import (
+    TransactionCreate,
+    TransactionFilter,
+    TransactionUpdate
+)
 
 
 def create_transaction(
@@ -7,14 +10,12 @@ def create_transaction(
     user_id,
     transaction: TransactionCreate
 ):
-
     query = """
         INSERT INTO transactions (
         user_id, account_id, category_id, type, amount,
         description, transaction_date)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
     """
-
     params = (
         user_id,
         transaction.account_id,
@@ -29,20 +30,17 @@ def create_transaction(
     return cursor.lastrowid
 
 
-
-
 def get_transactions(
     cursor,
     user_id,
     data: TransactionFilter
 ):
-
     query = """
         SELECT
         t.id, t.category_id, c.name AS category_name,
         t.account_id, a.name AS account_name,
         t.type, t.amount, t.description,
-        t.transaction_date,t.created_at
+        t.transaction_date, t.created_at
 
         FROM transactions t
         LEFT JOIN categories c
@@ -50,10 +48,8 @@ def get_transactions(
         JOIN accounts a
         ON t.account_id = a.id
         WHERE t.user_id = %s
-        AND (c.user_id = %s OR c.user_id IS NULL)
     """
-
-    params = [user_id, user_id]
+    params = [user_id]
 
     if data.start_date:
         query += " AND t.transaction_date >= %s"
@@ -86,7 +82,6 @@ def get_transactions(
     query += " ORDER BY t.transaction_date DESC"
 
     cursor.execute(query, params)
-
     return cursor.fetchall()
 
 
@@ -108,13 +103,11 @@ def get_transaction(
             ON t.account_id = a.id
             WHERE t.id = %s
             AND t.user_id = %s
-            AND (c.user_id = %s OR c.user_id IS NULL)
         """
-    params = [transaction_id, user_id, user_id]
+    params = (transaction_id, user_id)
+
     cursor.execute(query,params)
-
     return cursor.fetchone()
-
 
 
 def update_transaction(
@@ -135,7 +128,6 @@ def update_transaction(
             WHERE id = %s
             AND user_id = %s
         """
-    
     params = (
         transaction.category_id,
         transaction.amount,
@@ -148,7 +140,6 @@ def update_transaction(
     )
 
     cursor.execute(query, params)
-    return transaction_id
 
 
 def delete_transaction(
@@ -163,3 +154,21 @@ def delete_transaction(
         """
     params = (transaction_id, user_id)
     cursor.execute(query, params)
+
+
+
+def get_transaction_by_catgory(
+    cursor,
+    user_id,
+    category_id
+):
+    query = """
+            SELECT id
+            FROM transactions
+            WHERE category_id=%s
+            AND user_id=%s
+        """
+    params = (category_id, user_id)
+
+    cursor.execute(query,params)
+    return cursor.fetchone()

@@ -8,7 +8,6 @@ def send_reset_email(
     receiver_email: str,
     reset_link: str
 ):
-
     message = EmailMessage()
 
     message["Subject"] = "Reset your Expense Tracker password"
@@ -18,21 +17,15 @@ def send_reset_email(
         # Plain-text version
     message.set_content(
         f"""
-Hello,
-
-We received a request to reset your Expense Tracker password.
-
-Reset your password using this link:
-
-{reset_link}
-
-This link will expire in 15 minutes.
-
-If you did not request this, you can safely ignore this email.
-
-Regards,
-Expense Tracker
-"""
+        Hello,
+        We received a request to reset your Expense Tracker password.
+        Reset your password using this link:
+        {reset_link}
+        This link will expire in 15 minutes.
+        If you did not request this, you can safely ignore this email.
+        Regards,
+        Expense Tracker
+        """
     )
 
 
@@ -41,22 +34,18 @@ Expense Tracker
         <html>
             <body>
                 <h2>Reset your password</h2>
-
                 <p>
                     We received a request to reset your
                     Expense Tracker password.
                 </p>
-
                 <p>
                     <a href="{reset_link}">
                         Reset Password
                     </a>
                 </p>
-
                 <p>
                     This link will expire in 15 minutes.
                 </p>
-
                 <p>
                     If you did not request this,
                     you can safely ignore this email.

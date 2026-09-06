@@ -9,11 +9,16 @@ class RegisterUser(BaseModel):
     email: EmailStr
     password: str
 
-
-
 class LoginUser(BaseModel):
     email: EmailStr
     password: str
+
+class ForgotPassword(BaseModel):
+    email: EmailStr
+
+class ResetPassword(BaseModel):
+    token: str
+    new_password: str
 
 
 class CategoryCreate(BaseModel):
@@ -23,10 +28,11 @@ class CategoryCreate(BaseModel):
 class AccountCreate(BaseModel):
     name:str
 
+
 class TransactionCreate(BaseModel):
     account_id: int
     category_id: Optional[int] = None
-    type: Literal["INCOME", "EXPENSE"]
+    type: Literal["EXPENSE", "INCOME"]
     amount: Decimal
     description: Optional[str] = None
     transaction_date: date
@@ -34,7 +40,7 @@ class TransactionCreate(BaseModel):
 class TransactionUpdate(BaseModel):
     account_id: int
     category_id: Optional[int] = None
-    type: Literal["INCOME", "EXPENSE"]
+    type: Literal["EXPENSE", "INCOME"]
     amount: Decimal
     description: Optional[str] = None
     transaction_date: date
@@ -48,11 +54,11 @@ class TransactionFilter(BaseModel):
     end_date:Optional[date] = None
     type: Optional[Literal["INCOME", "EXPENSE"]] = None
 
+
 class BudgetCreate(BaseModel):
     category_id: int
     amount: float
     month: str
-
 
 class BudgetFilter(BaseModel):
     month: Optional[int] = None
@@ -61,22 +67,8 @@ class BudgetFilter(BaseModel):
     min_amount: Optional[float] = None
     max_amount: Optional[float] = None
 
-
 class BudgetUpdate(BaseModel):
     category_id: int
     amount: float
     month: str
 
-
-
-class ForgotPasswordRequest(BaseModel):
-    email: EmailStr
-
-
-class ResetPasswordRequest(BaseModel):
-    token: str
-    new_password: str
-
-
-class ChangePasswordRequest(BaseModel):
-    new_password: str

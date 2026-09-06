@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends
 from app.schemas import (
     RegisterUser,
     LoginUser,
-    ForgotPasswordRequest,
-    ResetPasswordRequest
+    ForgotPassword,
+    ResetPassword
 )
 
 from app.dependencies import (
@@ -42,7 +42,6 @@ def login_user(
     return login_user_service(db, user)
 
 
-
 @router.get("/profile")
 def get_profile(
     user_id: int = Depends(get_current_user),
@@ -51,18 +50,17 @@ def get_profile(
     return get_profile_service(db, user_id)
 
 
-# @router.post("/forgot-password")
-# def forgot_password(
-#     data: ForgotPasswordRequest,
-#     db=Depends(get_db)
-# ):
-#     return forgot_password_service(db, data)
+@router.post("/forgot-password")
+def forgot_password(
+    data: ForgotPassword,
+    db=Depends(get_db)
+):
+    return forgot_password_service(db, data)
 
 
-
-# @router.post("/reset-password")
-# def reset_password(
-#     data: ResetPasswordRequest,
-#     db=Depends(get_db)
-# ):
-#     return reset_password_service(db, data)
+@router.post("/reset-password")
+def reset_password(
+    data: ResetPassword,
+    db=Depends(get_db)
+):
+    return reset_password_service(db, data)

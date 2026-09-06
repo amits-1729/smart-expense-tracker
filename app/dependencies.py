@@ -19,7 +19,6 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     token = credentials.credentials
-
     try:
         user_id = decode_access_token(token)
         return user_id

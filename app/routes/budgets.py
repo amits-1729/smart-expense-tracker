@@ -1,10 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from typing import Annotated
 
 from app.dependencies import get_db, get_current_user
-from app.schemas import BudgetCreate, BudgetUpdate, BudgetFilter
+from app.schemas import (
+    BudgetCreate, BudgetUpdate, BudgetFilter
+)
 
-from app.services.budget_service import create_budget_service, get_budgets_service, get_budget_service, update_budget_service, delete_budget_service, get_budget_status_service
+from app.services.budget_service import (
+    create_budget_service, get_budgets_service, get_budget_service, update_budget_service, delete_budget_service, get_budget_status_service
+)
 
 
 router = APIRouter(
@@ -20,12 +24,9 @@ def create_budget(
     db=Depends(get_db)
 ):
     return create_budget_service(
-        db,
-        user_id,
-        budget
+        db, user_id, budget
     )
  
-
 
 @router.get("")
 def get_budgets(
@@ -34,11 +35,8 @@ def get_budgets(
     db=Depends(get_db)
 ):
     return get_budgets_service(
-        db,
-        user_id,
-        data
+        db, user_id, data
     )
-
 
 
 @router.get("/status")
@@ -49,12 +47,8 @@ def get_budget_status(
     db=Depends(get_db)
 ):
     return get_budget_status_service(
-        db,
-        user_id,
-        month,
-        year
+        db, user_id, month, year
     )
-
 
 
 @router.get("/{budget_id}")
@@ -66,8 +60,6 @@ def get_budget(
     return get_budget_service(db, user_id, budget_id)
 
 
-
-    
 @router.put("/{budget_id}")
 def update_budget(
     budget_id: int,
@@ -76,14 +68,8 @@ def update_budget(
     db=Depends(get_db)
 ):
     return update_budget_service(
-        db,
-        user_id,
-        budget_id,
-        budget
+        db, user_id, budget_id, budget
     )
-
-
-    
 
 
 @router.delete("/{budget_id}")
@@ -93,8 +79,6 @@ def delete_expense(
     db=Depends(get_db)
 ):
     return delete_budget_service(
-        db,
-        user_id,
-        budget_id
+        db, user_id, budget_id
     )
 
