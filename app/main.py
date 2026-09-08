@@ -13,7 +13,7 @@ app = FastAPI(title="Smart Expense Tracker API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins; restrict in production
+    allow_origins=["https://smart-expense-tracker-frontend-rho.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
     allow_headers=["*"],  # Allows all headers

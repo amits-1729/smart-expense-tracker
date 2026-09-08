@@ -46,6 +46,9 @@ def decode_access_token(token: str) -> int:
         algorithms=[ALGORITHM]
     )
 
+    if payload.get("type") != "access":
+        raise ValueError("Invalid access token")
+
     user_id = payload.get("sub")
     if user_id is None:
         raise ValueError("Invalid token")

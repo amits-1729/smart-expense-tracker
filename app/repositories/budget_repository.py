@@ -1,5 +1,6 @@
 
 from app.schemas import BudgetFilter, BudgetUpdate
+import datetime
 
 
 def get_budget_by_m_id(cursor, user_id, month, category_id):
@@ -38,7 +39,7 @@ def create_budget(cursor, user_id, month, category_id, amount):
             budgets (user_id, category_id, amount, month, year)
             VALUES (%s, %s, %s, %s, %s)
             """
-    params = (user_id, category_id, amount, month, 2026)
+    params = (user_id, category_id, amount, month, datetime.now().year)
 
     cursor.execute(query, params)
     return cursor.lastrowid

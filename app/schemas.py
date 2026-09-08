@@ -58,7 +58,7 @@ class TransactionFilter(BaseModel):
 class BudgetCreate(BaseModel):
     category_id: int
     amount: float
-    month: str
+    month: int
 
 class BudgetFilter(BaseModel):
     month: Optional[int] = None
@@ -70,5 +70,5 @@ class BudgetFilter(BaseModel):
 class BudgetUpdate(BaseModel):
     category_id: int
     amount: float
-    month: str
+    month: int
 
