@@ -121,10 +121,11 @@ def forgot_password_service(db, data: ForgotPassword):
                 f"?token={reset_token}"
             )
 
-            send_reset_email(
-                user["email"],
-                reset_link
-            )
+            # send_reset_email(
+            #     user["email"],
+            #     reset_link
+            # )
+
             # print("PASSWORD RESET LINK:")
             # print(reset_link)
         return {
