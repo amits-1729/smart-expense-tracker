@@ -1,6 +1,6 @@
 
 from app.schemas import BudgetFilter, BudgetUpdate
-import datetime
+from datetime import datetime
 
 
 def get_budget_by_m_id(cursor, user_id, month, category_id):
